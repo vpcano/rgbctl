@@ -1,0 +1,10 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/victor/Dev/rgbctl'
+rm -rf obj/devices/*.o obj/*.o rgbctl
+gcc -g -Wall -I./include/ -c src/main.c -o obj/main.o
+gcc -g -Wall -I./include/ -c src/devices/logitech_g300.c -o obj/devices/logitech_g300.o
+gcc -g -Wall -I./include/ -c src/devices/drevo_calibur_v2.c -o obj/devices/drevo_calibur_v2.o
+gcc -g -Wall -I./include/ -c src/helpers.c -o obj/helpers.o
+gcc -g -Wall obj/main.o obj/devices/logitech_g300.o obj/devices/drevo_calibur_v2.o obj/helpers.o -lncursesw -lmenu -lusb-1.0 -o rgbctl
+make: Leaving directory '/home/victor/Dev/rgbctl'
+ 

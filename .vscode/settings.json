@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "drevo_calibur_v2.h": "c",
+        "libusb.h": "c",
+        "hid.h": "c"
+    }
+}
