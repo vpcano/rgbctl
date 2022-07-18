@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jul 18 11:27:33 2022
+# Make data base, printed on Mon Jul 18 16:58:16 2022
 
 # Variables
 
@@ -19,7 +19,7 @@ NO_AT_BRIDGE = 1
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-2891ca9f-271b-4577-8307-39cbb220fe38.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-6a43764d-f39e-4e5e-88fb-414532406148.sock
 # environment
 VSCODE_CWD = /home/victor
 # environment
@@ -175,6 +175,8 @@ GNOME_SETUP_DISPLAY = :1
 # automatic
 ?F = $(notdir $?)
 # environment
+DESKTOP_AUTOSTART_ID = 105a8663da7aa36e81165813635045420000000015720022
+# environment
 XDG_CURRENT_DESKTOP = GNOME
 # environment
 KDEDIRS = /usr
@@ -253,7 +255,7 @@ XDG_MENU_PREFIX = gnome-
 # environment
 GDMSESSION = gnome
 # variable set hash-table stats:
-# Load=121/1024=12%, Rehash=0, Collisions=13/156=8%
+# Load=122/1024=12%, Rehash=0, Collisions=13/157=8%
 
 # Pattern-specific Variable Values
 
@@ -263,9 +265,9 @@ GDMSESSION = gnome
 
 # include (device 2067, inode 5380453): 7 files, no impossibilities.
 # src (device 2067, inode 5376732): No files, no impossibilities so far.
-# . (device 2067, inode 5380044): 9 files, no impossibilities.
+# . (device 2067, inode 5380044): 11 files, no impossibilities.
 
-# 16 files, no impossibilities in 3 directories.
+# 18 files, no impossibilities in 3 directories.
 
 # Implicit Rules
 
@@ -275,9 +277,9 @@ obj/%.o: src/%.c include/device.h include/drevo_calibur_v2.h include/helpers.h i
 
 # 1 implicit rules, 0 (0.0%) terminal.
 # Files
+ 
 
 rgbctl: obj/main.o obj/devices/logitech_g300.o obj/devices/drevo_calibur_v2.o obj/helpers.o
- 
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -371,12 +373,12 @@ all: clean rgbctl
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 31 / storage = 390 B / avg = 12 B
-# current buf: size = 8162 B / used = 390 B / count = 31 / avg = 12 B
+# strcache buffers: 1 (0) / strings = 33 / storage = 406 B / avg = 12 B
+# current buf: size = 8162 B / used = 406 B / count = 33 / avg = 12 B
 
-# strcache performance: lookups = 47 / hit rate = 34%
+# strcache performance: lookups = 49 / hit rate = 32%
 # hash-table stats:
-# Load=31/8192=0%, Rehash=0, Collisions=0/47=0%
-# Finished Make data base on Mon Jul 18 11:27:33 2022
+# Load=33/8192=0%, Rehash=0, Collisions=0/49=0%
+# Finished Make data base on Mon Jul 18 16:58:16 2022
 
  

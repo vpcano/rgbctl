@@ -152,6 +152,7 @@ int start() {
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
+    curs_set(0);
     if (has_colors()) {
         start_color();
         init_pair(0, COLOR_WHITE, COLOR_BLACK);
