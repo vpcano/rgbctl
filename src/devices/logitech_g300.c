@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <menu.h>
 #include <string.h>
 #include <linux/hid.h>
@@ -356,6 +357,8 @@ short g300_change_button(WINDOW *dev_win, u_char *mode_data, short button);
 void g300_get_key_str(u_char *mode_data, char *str);
 short g300_mode_menu(WINDOW *dev_win);
 short g300_load_mode(libusb_device_handle *dev_handle, uint16_t mode, u_char *mode_data);
+short g300_save_mode(libusb_device_handle *dev_handle, uint16_t mode, u_char *mode_data);
+short g300_prompt_save(WINDOW *dev_win);
 void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight, bool modified);
 void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win);
 
@@ -370,7 +373,7 @@ Device Logitech_G300 = {
 
 void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
     int c, f, sel;
-    bool highlight, modified;
+    bool highlight, modified, flag;
     uint16_t mode;
     u_char mode_data[MODE_DATA_LEN];
 
@@ -422,9 +425,11 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
     halfdelay(5);   /* To enable blink of selected menu item */
     highlight = TRUE;
     modified = FALSE;
+    flag = TRUE;
     g300_print_mode(dev_win, mode_data, sel, highlight, modified);
 
-    while((c = wgetch(dev_win)) != 'q') {
+    while (flag) {
+        c = wgetch(dev_win);
         highlight = !highlight;
         switch (c) {
             case 'j':
@@ -440,6 +445,26 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
                 break;
 
             case 'm':
+                if (modified) {
+                    f = g300_prompt_save(dev_win);
+                    if (f > 0) {
+                        f = g300_save_mode(dev_handle, mode, mode_data);
+                        if (f < 0) {
+                            wclear(dev_win);
+                            print_in_middle(dev_win, LINES/2-1, 0, COLS, "Error saving mode into device", COLOR_PAIR(1));
+                            print_in_middle(dev_win, LINES/2, 0, COLS, "Press \"q\" to exit...", COLOR_PAIR(1));
+                            wrefresh(dev_win);
+                            /* Mouse deinit */
+                            libusb_release_interface(dev_handle, IFACE);
+                            libusb_attach_kernel_driver(dev_handle, IFACE);
+                            while((c = wgetch(dev_win)) != 'q');
+                            return;
+                        }
+                        modified = FALSE;
+                    } else if (f == 0) {
+                        break;
+                    }
+                }
                 /* Get new mode */
                 f = g300_mode_menu(dev_win);
                 if (f < 0) break;
@@ -456,10 +481,23 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
                     while((c = wgetch(dev_win)) != 'q');
                     return;
                 }
+                modified = FALSE;
                 break;
             
             case 's':
-                // TODO Save...
+                f = g300_save_mode(dev_handle, mode, mode_data);
+                if (f < 0) {
+                    wclear(dev_win);
+                    print_in_middle(dev_win, LINES/2-1, 0, COLS, "Error saving mode into device", COLOR_PAIR(1));
+                    print_in_middle(dev_win, LINES/2, 0, COLS, "Press \"q\" to exit...", COLOR_PAIR(1));
+                    wrefresh(dev_win);
+                    /* Mouse deinit */
+                    libusb_release_interface(dev_handle, IFACE);
+                    libusb_attach_kernel_driver(dev_handle, IFACE);
+                    while((c = wgetch(dev_win)) != 'q');
+                    return;
+                }
+                modified = FALSE;
                 break;
 
             case 10:
@@ -479,6 +517,31 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
 
             case '?':
                 // TODO Help...
+
+            case 'q':
+                if (modified) {
+                    f = g300_prompt_save(dev_win);
+                    if (f > 0) {
+                        f = g300_save_mode(dev_handle, mode, mode_data);
+                        if (f < 0) {
+                            wclear(dev_win);
+                            print_in_middle(dev_win, LINES/2-1, 0, COLS, "Error saving mode into device", COLOR_PAIR(1));
+                            print_in_middle(dev_win, LINES/2, 0, COLS, "Press \"q\" to exit...", COLOR_PAIR(1));
+                            wrefresh(dev_win);
+                            /* Mouse deinit */
+                            libusb_release_interface(dev_handle, IFACE);
+                            libusb_attach_kernel_driver(dev_handle, IFACE);
+                            while((c = wgetch(dev_win)) != 'q');
+                            return;
+                        }
+                        modified = FALSE;                       
+                    }
+                    else if (f == 0) {
+                        break;
+                    }
+                }
+                flag = FALSE;
+                break;
 
             default:
                 break;
@@ -513,9 +576,38 @@ short g300_load_mode(libusb_device_handle *dev_handle, uint16_t mode, u_char *mo
         ,MODE_DATA_LEN
         ,1000
     );
-    //usleep(10000);
+    usleep(10000);
     
     if (f < MODE_DATA_LEN) return ERR;
+    return OK;
+}
+
+short g300_save_mode(libusb_device_handle *dev_handle, uint16_t mode, u_char *mode_data) {
+    int f;
+    u_char data_saved[MODE_DATA_LEN];
+
+    if (dev_handle == NULL || mode_data == NULL) return ERR;
+    if (mode != 0xf3 && mode != 0xf4 && mode != 0xf5) return ERR;
+
+    f = libusb_control_transfer(
+         dev_handle
+        ,LIBUSB_REQUEST_TYPE_CLASS|LIBUSB_RECIPIENT_INTERFACE|LIBUSB_ENDPOINT_OUT
+        ,HID_REQ_SET_REPORT
+        ,0x0300|mode
+        ,0x0001
+        ,mode_data
+        ,MODE_DATA_LEN
+        ,1000
+    );
+    usleep(500000); // Writes are SLOW
+    if (f < MODE_DATA_LEN) return ERR;
+
+    f = g300_load_mode(dev_handle, mode, data_saved);
+    if (f != OK) return ERR;
+    if (memcmp(mode_data, data_saved, MODE_DATA_LEN) != 0) {
+        return ERR;
+    }
+
     return OK;
 }
 
@@ -527,7 +619,7 @@ short g300_mode_menu(WINDOW *dev_win) {
     int height, width, c;
     short i, k;
 
-    if (dev_win == NULL) return -1;
+    if (dev_win == NULL) return ERR;
 
     modes[0] = new_item("Mode 1", NULL);
     modes[1] = new_item("Mode 2", NULL);
@@ -936,5 +1028,76 @@ void g300_toggle_dpi_shift(u_char *mode_data) {
 }
 
 short g300_change_button(WINDOW *dev_win, u_char *mode_data, short button) {
+    return 0;
+}
+
+
+short g300_prompt_save(WINDOW *dev_win) {
+    WINDOW *dialog;
+    MENU *opt_select;
+    ITEM *opts[4], *currentItem;
+    int height, width, c, i, k;
+
+    if (dev_win == NULL) return ERR;
+
+    opts[0] = new_item("Yes", NULL);
+    opts[1] = new_item("No", NULL);
+    opts[2] = new_item("Cancel", NULL);
+    opts[3] = NULL;
+
+    opt_select = new_menu(opts);
+    getmaxyx(dev_win, height, width);
+    dialog = newwin(6, 44, height/2 - 3, width/2 - 22);
+    keypad(dialog, TRUE);
+    set_menu_win(opt_select, dialog);
+    set_menu_sub(opt_select, derwin(dialog, 1, 26, 4, 11));
+    set_menu_mark(opt_select, "");
+    set_menu_format(opt_select, 1, 3);
+    box(dialog, 0, 0);
+    print_in_middle(dialog, 1, 0, 44, "Warning: Unsaved changes.", COLOR_PAIR(5));
+    print_in_middle(dialog, 2, 0, 44, "Would you like to save them into device?", COLOR_PAIR(3));
+	wrefresh(dev_win);
+    post_menu(opt_select);
+    wrefresh(dialog);
+
+    do {
+        c = wgetch(dialog);
+        switch(c) {
+            case 'j':
+            case 'l':
+            case KEY_DOWN:
+			case KEY_RIGHT:
+				menu_driver(opt_select, REQ_NEXT_ITEM);
+				break;
+            case 'k':
+            case 'h':
+			case KEY_UP:
+            case KEY_LEFT:
+				menu_driver(opt_select, REQ_PREV_ITEM);
+				break;
+            default:
+                break;
+        }
+    } while (c != 'q' && c != 10);
+
+    k = -1;
+    if (c == 10) {
+        currentItem = current_item(opt_select);
+        if (currentItem != NULL) {
+            k = item_index(currentItem);
+        }
+    }
+
+    unpost_menu(opt_select);
+    free_menu(opt_select);
+    for (i=0; i<3; i++) free_item(opts[i]);
+    wclear(dialog);
+    wborder(dialog, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+    wrefresh(dialog);
+    delwin(dialog);
+    wrefresh(dev_win);
+
+    if (k==0) return 1;
+    if (k==1) return -1;
     return 0;
 }
