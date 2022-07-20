@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jul 18 16:58:16 2022
+# Make data base, printed on Wed Jul 20 13:05:01 2022
 
 # Variables
 
@@ -18,8 +18,6 @@ LC_ALL = C
 NO_AT_BRIDGE = 1
 # environment
 GJS_DEBUG_OUTPUT = stderr
-# environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-6a43764d-f39e-4e5e-88fb-414532406148.sock
 # environment
 VSCODE_CWD = /home/victor
 # environment
@@ -52,16 +50,14 @@ XDG_DATA_DIRS = /home/victor/.local/share/flatpak/exports/share:/var/lib/flatpak
 OLDPWD = /home/victor
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
-# environment
-VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/victor/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+VSCODE_CODE_CACHE_PATH = /home/victor/.config/Code/CachedData/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
 # environment
 LANG = C
 # environment
-XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.JU6MP1
+XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.4KKKP1
 # default
 .LOADED := 
 # environment
@@ -74,8 +70,6 @@ MAKEFLAGS = pqrR
 LESS_TERMCAP_so = 
 # makefile
 CURDIR := /home/victor/Dev/rgbctl
-# environment
-VSCODE_PIPE_LOGGING = true
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
@@ -107,9 +101,7 @@ MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
-VSCODE_PID = 3257
+VSCODE_PID = 3349
 # environment
 SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS = 0
 # environment
@@ -119,7 +111,7 @@ XDG_SESSION_TYPE = wayland
 # makefile (from 'Makefile', line 3)
 INCLUDES = -I./include/
 # environment
-SESSION_MANAGER = local/unix:@/tmp/.ICE-unix/1572,unix/unix:/tmp/.ICE-unix/1572
+SESSION_MANAGER = local/unix:@/tmp/.ICE-unix/1590,unix/unix:/tmp/.ICE-unix/1590
 # automatic
 *F = $(notdir $*)
 # environment
@@ -129,7 +121,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # automatic
 <D = $(patsubst %/,%,$(dir $<))
 # environment
-VSCODE_NLS_CONFIG = {"locale":"es","availableLanguages":{"*":"es"},"_languagePackId":"125a9a608456aa5e8a25d0a18c7b1d68.es","_translationsConfigFile":"/home/victor/.config/Code/clp/125a9a608456aa5e8a25d0a18c7b1d68.es/tcf.json","_cacheRoot":"/home/victor/.config/Code/clp/125a9a608456aa5e8a25d0a18c7b1d68.es","_resolvedLanguagePackCoreLocation":"/home/victor/.config/Code/clp/125a9a608456aa5e8a25d0a18c7b1d68.es/30d9c6cd9483b2cc586687151bcbcd635f373630","_corruptedFile":"/home/victor/.config/Code/clp/125a9a608456aa5e8a25d0a18c7b1d68.es/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"es","availableLanguages":{"*":"es"},"_languagePackId":"eae11d900af9c06c6da7ac60cedf8cf9.es","_translationsConfigFile":"/home/victor/.config/Code/clp/eae11d900af9c06c6da7ac60cedf8cf9.es/tcf.json","_cacheRoot":"/home/victor/.config/Code/clp/eae11d900af9c06c6da7ac60cedf8cf9.es","_resolvedLanguagePackCoreLocation":"/home/victor/.config/Code/clp/eae11d900af9c06c6da7ac60cedf8cf9.es/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a","_corruptedFile":"/home/victor/.config/Code/clp/eae11d900af9c06c6da7ac60cedf8cf9.es/corrupted.info","_languagePackSupport":true}
 # default
 MAKE_HOST := x86_64-redhat-linux-gnu
 # makefile
@@ -165,17 +157,13 @@ LESS_TERMCAP_mb =
 # environment
 XDG_CONFIG_HOME = /home/victor/.config
 # environment
-INVOCATION_ID = b91fe1c1742842879a9b5636d11b0d2d
-# environment
-VSCODE_LOG_NATIVE = false
+INVOCATION_ID = 5c4751b87b184532809fd71af3199527
 # environment
 USERNAME = victor
 # environment
 GNOME_SETUP_DISPLAY = :1
 # automatic
 ?F = $(notdir $?)
-# environment
-DESKTOP_AUTOSTART_ID = 105a8663da7aa36e81165813635045420000000015720022
 # environment
 XDG_CURRENT_DESKTOP = GNOME
 # environment
@@ -197,7 +185,7 @@ GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
 # makefile
 .DEFAULT_GOAL := all
 # environment
-SYSTEMD_EXEC_PID = 1633
+SYSTEMD_EXEC_PID = 1652
 # environment
 HISTCONTROL = ignoredups
 # environment
@@ -209,13 +197,13 @@ USER = victor
 # default
 MAKE_VERSION := 4.3
 # environment
-MANAGERPID = 1458
+MANAGERPID = 1475
 # environment
 which_declare = typeset -f
 # environment
 DEBUGINFOD_URLS = https://debuginfod.fedoraproject.org/ 
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 3257
+GIO_LAUNCHED_DESKTOP_FILE_PID = 3349
 # environment
 _ = /usr/bin/make
 # environment
@@ -223,7 +211,7 @@ XDG_RUNTIME_DIR = /run/user/1000
 # makefile (from 'Makefile', line 1)
 CFLAGS = -g -Wall
 # environment
-JOURNAL_STREAM = 8:30963
+JOURNAL_STREAM = 8:29378
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -235,7 +223,7 @@ QT_IM_MODULE = ibus
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-a3af7379-1.68.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-a3af7379-1.69.1-main.sock
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -255,7 +243,7 @@ XDG_MENU_PREFIX = gnome-
 # environment
 GDMSESSION = gnome
 # variable set hash-table stats:
-# Load=122/1024=12%, Rehash=0, Collisions=13/157=8%
+# Load=116/1024=11%, Rehash=0, Collisions=12/151=8%
 
 # Pattern-specific Variable Values
 
@@ -277,7 +265,6 @@ obj/%.o: src/%.c include/device.h include/drevo_calibur_v2.h include/helpers.h i
 
 # 1 implicit rules, 0 (0.0%) terminal.
 # Files
- 
 
 rgbctl: obj/main.o obj/devices/logitech_g300.o obj/devices/drevo_calibur_v2.o obj/helpers.o
 #  Implicit rule search has not been done.
@@ -290,6 +277,7 @@ rgbctl: obj/main.o obj/devices/logitech_g300.o obj/devices/drevo_calibur_v2.o ob
 obj/main.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
+ 
 #  File has not been updated.
 
 # Not a target:
@@ -379,6 +367,6 @@ all: clean rgbctl
 # strcache performance: lookups = 49 / hit rate = 32%
 # hash-table stats:
 # Load=33/8192=0%, Rehash=0, Collisions=0/49=0%
-# Finished Make data base on Mon Jul 18 16:58:16 2022
+# Finished Make data base on Wed Jul 20 13:05:01 2022
 
  

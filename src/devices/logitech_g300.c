@@ -349,10 +349,14 @@ const char *s_keys[] = {
 
 
 
+short g300_change_color(WINDOW *dev_win, u_char *mode_data);
+short g300_change_dpi(WINDOW *dev_win, u_char *mode_data, short level);
+void g300_toggle_dpi_shift(u_char *mode_data);
+short g300_change_button(WINDOW *dev_win, u_char *mode_data, short button);
 void g300_get_key_str(u_char *mode_data, char *str);
 short g300_mode_menu(WINDOW *dev_win);
 short g300_load_mode(libusb_device_handle *dev_handle, uint16_t mode, u_char *mode_data);
-void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight);
+void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight, bool modified);
 void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win);
 
 
@@ -366,7 +370,7 @@ Device Logitech_G300 = {
 
 void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
     int c, f, sel;
-    bool highlight;
+    bool highlight, modified;
     uint16_t mode;
     u_char mode_data[MODE_DATA_LEN];
 
@@ -417,7 +421,8 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
     sel = 0;
     halfdelay(5);   /* To enable blink of selected menu item */
     highlight = TRUE;
-    g300_print_mode(dev_win, mode_data, sel, highlight);
+    modified = FALSE;
+    g300_print_mode(dev_win, mode_data, sel, highlight, modified);
 
     while((c = wgetch(dev_win)) != 'q') {
         highlight = !highlight;
@@ -452,10 +457,34 @@ void g300_cb(libusb_device_handle *dev_handle, WINDOW *dev_win) {
                     return;
                 }
                 break;
-            // ...
+            
+            case 's':
+                // TODO Save...
+                break;
+
+            case 10:
+                if (sel < 1) {
+                    if (g300_change_color(dev_win, mode_data)) modified = TRUE;
+                } else if (sel < 5) {
+                    if (g300_change_dpi(dev_win, mode_data, sel - 1)) modified = TRUE;
+                }
+                else if (sel == 5) {
+                    g300_toggle_dpi_shift(mode_data);
+                    modified = TRUE;
+                }
+                else {
+                    if (g300_change_button(dev_win, mode_data, sel - 6)) modified = TRUE;
+                }
+                break;
+
+            case '?':
+                // TODO Help...
+
+            default:
+                break;
         }
         /* Print mode */
-        g300_print_mode(dev_win, mode_data, sel, highlight);
+        g300_print_mode(dev_win, mode_data, sel, highlight, modified);
     }
     cbreak();
 
@@ -558,7 +587,7 @@ short g300_mode_menu(WINDOW *dev_win) {
 }
 
 
-void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight) {
+void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight, bool modified) {
     int i, width, height, scheme_x, scheme_y, menu_x, menu_y;
     short mode, color, scheme;
     char buf[STR_LEN], *po;
@@ -580,7 +609,9 @@ void g300_print_mode(WINDOW *dev_win, u_char *mode_data, int sel, bool highlight
 	mvwhline(dev_win, 2, 1, ACS_HLINE, width-2);
 	mvwaddch(dev_win, 2, width-1, ACS_RTEE);
     mvwprintw(dev_win, 1, 1, "Mode selected: %u", mode);
+    if (modified) wprintw(dev_win, "*");
     print_right(dev_win, 1, 1, width-2, NAME, COLOR_PAIR(7));
+	mvwprintw(dev_win, height - 2, 1, "\"q\" to exit, \"m\" to change mode, \"s\" to save mode settings, \"?\" for help");
 
     /* Mouse scheme */
     if (height > 30 && width > 49) {
@@ -754,4 +785,156 @@ void g300_get_key_str(u_char *but, char *str) {
     if (but[2] > 0) sprintf(str, "%s", s_keys[but[2]]);
 
     return;
+}
+
+
+short g300_change_color(WINDOW *dev_win, u_char *mode_data) {
+    MENU *color_select;
+    ITEM *colors[9], *currentItem;
+    WINDOW *color_menu_win;
+    int height, width, c;
+    short i, ret;
+
+    if (dev_win == NULL) return -1;
+
+    for (i=0; i<8; i++) {
+        colors[i] = new_item(s_color[i], NULL);
+    }
+    colors[8] = NULL;
+
+    color_select = new_menu(colors);
+    getmaxyx(dev_win, height, width);
+    color_menu_win = newwin(12,21,height/2 - 6, width/2 - 11);
+    keypad(color_menu_win, TRUE);
+    set_menu_win(color_select, color_menu_win);
+    set_menu_sub(color_select, derwin(color_menu_win, 8, 10, 3, 4));
+    set_menu_mark(color_select, " > ");
+    box(color_menu_win, 0, 0);
+    print_in_middle(color_menu_win, 1, 0, 21, "Select a color:", COLOR_PAIR(3));
+	mvwaddch(color_menu_win, 2, 0, ACS_LTEE);
+	mvwhline(color_menu_win, 2, 1, ACS_HLINE, 19);
+	mvwaddch(color_menu_win, 2, 20, ACS_RTEE);
+	wrefresh(dev_win);
+    post_menu(color_select);
+    wrefresh(color_menu_win);
+
+    do {
+        c = wgetch(color_menu_win);
+        switch(c) {
+            case 'j':
+            case KEY_DOWN:
+                currentItem = current_item(color_select);
+				menu_driver(color_select, REQ_DOWN_ITEM);
+				break;
+            case 'k':
+			case KEY_UP:
+				menu_driver(color_select, REQ_UP_ITEM);
+				break;
+            default:
+                break;
+        }
+    } while (c != 'q' && c != 10);
+
+    ret = FALSE;
+    if (c == 10) {
+        currentItem = current_item(color_select);
+        if (currentItem != NULL) {
+            i = item_index(currentItem);
+            mode_data[1] = i;
+            ret = TRUE;
+        }
+    }
+
+    unpost_menu(color_select);
+    free_menu(color_select);
+    for (i=0; i<8; i++) free_item(colors[i]);
+    wclear(color_menu_win);
+    wborder(color_menu_win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+    wrefresh(color_menu_win);
+    delwin(color_menu_win);
+    wrefresh(dev_win);
+
+    return ret;
+}
+
+short g300_change_dpi(WINDOW *dev_win, u_char *mode_data, short level) {
+    WINDOW *dpi_select_win;
+    int height, width, c, dpi, dpi_ini;
+    short lvl;
+
+    getmaxyx(dev_win, height, width);
+    dpi_select_win = newwin(7,21,height/2 - 6, width/2 - 11);
+    keypad(dpi_select_win, TRUE);
+    box(dpi_select_win, 0, 0);
+    print_in_middle(dpi_select_win, 1, 0, 21, "Select a dpi value:", COLOR_PAIR(3));
+	mvwaddch(dpi_select_win, 2, 0, ACS_LTEE);
+	mvwhline(dpi_select_win, 2, 1, ACS_HLINE, 19);
+	mvwaddch(dpi_select_win, 2, 20, ACS_RTEE);
+    wattron(dpi_select_win, A_STANDOUT);
+    wattron(dpi_select_win, A_BOLD);
+    mvwprintw(dpi_select_win, 4, 2, "-");
+    mvwprintw(dpi_select_win, 4, 18, "+");
+    wattroff(dpi_select_win, A_BOLD);
+    wattroff(dpi_select_win, A_STANDOUT);
+	wrefresh(dev_win);
+    wrefresh(dpi_select_win);
+
+    lvl = level + 3;
+    dpi_ini = DPI_VAL(mode_data[lvl] & 0x0f);
+    dpi = dpi_ini;
+
+    c = -1;
+    do {
+        switch (c) {
+            case 'j':
+            case '-':
+            case 'h':
+            case KEY_DOWN:
+            case KEY_LEFT:
+                if (dpi > 250) dpi -= 250;
+                break;
+
+            case 'k':
+            case '+':
+            case 'l':
+            case KEY_UP:
+            case KEY_RIGHT:
+                if (dpi < 3750) dpi += 250;
+                break;
+
+            default:
+                break;
+        }
+        wattron(dpi_select_win, A_STANDOUT);
+        mvwprintw(dpi_select_win, 4, 9, "%4d", dpi);
+        wattroff(dpi_select_win, A_STANDOUT);
+        wrefresh(dpi_select_win);
+        c = wgetch(dpi_select_win);
+    } while (c != 'q' && c != 10);
+
+    if (c == 10 && dpi != dpi_ini) {
+        mode_data[lvl] = (dpi/250) & 0xf;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void g300_toggle_dpi_shift(u_char *mode_data) {
+    u_char *def, *shift;
+
+    def = mode_data + 3;
+    shift = mode_data + 7;
+
+    if (*shift & 0x40) {
+        *shift = *def & 0x0f;
+    } else {
+        *shift |= 0x40;
+    }
+
+    return;
+}
+
+short g300_change_button(WINDOW *dev_win, u_char *mode_data, short button) {
+    return 0;
 }
